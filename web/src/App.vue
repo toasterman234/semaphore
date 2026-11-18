@@ -695,7 +695,20 @@
       </template>
     </v-navigation-drawer>
 
-    <v-main data-testid="app-main">
+    <!-- A separate, thumb-friendly mobile navigation surface. The existing drawer remains
+         the desktop navigation and the mobile More menu, preserving all permission gates. -->
+    <MobileProjectNavigation
+      v-if="project && $vuetify.display.smAndDown"
+      :project-id="projectId"
+      :current-path="$route.path"
+      :items="navItems"
+      @open-menu="drawer = true"
+    />
+
+    <v-main
+      data-testid="app-main"
+      :class="{ 'app-main--mobile-nav': project && $vuetify.display.smAndDown }"
+    >
       <router-view
         :projectId="projectId"
         :projectType="(project || {}).type || ''"
@@ -761,6 +774,11 @@
   <v-app v-else></v-app>
 </template>
 <style lang="scss">
+// Reserve touch and home-indicator space only while the mobile dock is present.
+.app-main--mobile-nav {
+  padding-bottom: calc(64px + env(safe-area-inset-bottom)) !important;
+}
+
 // Vuetify's reset forces `overflow-y: scroll` on <html>, so every page draws
 // an empty scrollbar track on the right. Show the page scrollbar only when
 // the content actually overflows. `:root` outranks Vuetify's `html` selector,
@@ -1276,6 +1294,7 @@ import YesNoDialog from '@/components/YesNoDialog.vue';
 import TaskLogDialog from '@/components/TaskLogDialog.vue';
 import WorkflowRunPanel from '@/components/WorkflowRunPanel.vue';
 import SystemInfoDialog from '@/components/SystemInfoDialog.vue';
+import MobileProjectNavigation from '@/components/MobileProjectNavigation.vue';
 import delay from '@/lib/delay';
 
 const PROJECT_COLORS = ['red', 'blue', 'orange', 'green'];
@@ -1361,6 +1380,7 @@ export default {
     EditDialog,
     ProjectForm,
     SystemInfoDialog,
+    MobileProjectNavigation,
   },
   data() {
     return {
